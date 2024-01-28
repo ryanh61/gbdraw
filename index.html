@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<title>Gameboy Draw</title>
+	<!-- TODO: css -->
+	<script type="text/javascript" src="main.js" defer></script>
+</head>
+
+<body>
+	<h1>Gameboy Draw</h1>
+	<!-- canvas 
+		NOTE: for now, static 16 x 16 pixels, so keep width == height
+	-->
+	<canvas id="canvas_pixels" width="400" height="400"></canvas> <br/>
+
+	<!-- controls  
+		  - TODO: grid size; start with static grid
+		  - TODO: zoom
+	-->
+
+	<!-- TODO: allow changing color with keyboard? -->
+	Color: <input type="radio" name="current_color" id="color_0" value="color_0" checked /><label for="color_0">0</label> 
+	<input type="radio" name="current_color" id="color_1" value="color_1" /><label for="color_1">1</label> 
+	<input type="radio" name="current_color" id="color_2" value="color_2" /><label for="color_2">2</label>
+	<input type="radio" name="current_color" id="color_3" value="color_3" /><label for="color_3">3</label>
+	<br/>
+
+	<br/>
+	<button onclick="generateASM();">Generate ASM</button><br/>
+
+	<br/><br/>
+	ASM Output:<br/>
+	<textarea cols="100" rows="10" id="asm_output"></textarea>
+
+</body>
+
+</html>
