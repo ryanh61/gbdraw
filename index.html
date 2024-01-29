@@ -13,7 +13,8 @@
 	<!-- canvas 
 		NOTE: for now, static 16 x 16 pixels, so keep width == height
 	-->
-	<canvas id="canvas_pixels" width="400" height="400"></canvas> <br/>
+	<canvas id="canvas_pixels" width="400" height="400"></canvas> 
+	<canvas id="canvas_preview" width="80" height="80" style="border:1px solid black;"></canvas><br/>
 
 	<!-- controls  
 		  - TODO: grid size; start with static grid
@@ -26,7 +27,15 @@
 	<input type="radio" name="current_color" id="color_2" value="color_2" /><label for="color_2">2</label>
 	<input type="radio" name="current_color" id="color_3" value="color_3" /><label for="color_3">3</label>
 	<br/>
+	<label for="grid_checkbox">Grid:</label> <input type="checkbox" id="grid_checkbox" name="grid_checkbox" value="drawgrid_check" onclick="gridCheckClicked();" />
+	<br/>
+	Palette: 
+	<select name="palettes" id="palette_select" onchange="paletteChange();">
+		<option value="DMG">DMG</option>
+		<option value="Pocket">Pocket</option>
+	</select>
 
+	<br/>
 	<br/>
 	<button onclick="generateASM();">Generate ASM</button><br/>
 

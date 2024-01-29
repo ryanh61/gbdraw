@@ -15,6 +15,21 @@ for (var i = 0; i < pixels_height; i++) {
 	stored_pixels.push(pxarr);
 }
 
+palette_data = {
+	'DMG' : {
+		'color_0': '#9bbc0f',
+		'color_1': '#8bac0f',
+		'color_2': '#306230',
+		'color_3': '#0f380f'
+	},
+	'Pocket' : {
+		'color_0': '#ffffff', // not really right for any of these...
+		'color_1': '#b6b6b6',
+		'color_2': '#676767',
+		'color_3': '#000000'
+	}
+}
+
 const pixelCanvas = document.getElementById("canvas_pixels");
 const ctx = pixelCanvas.getContext("2d");
 
@@ -68,10 +83,16 @@ function drawGrid() {
 	ctx.closePath();
 }
 
-drawGrid();
+gridCheckbox = document.getElementById("grid_checkbox");
+if (gridCheckbox.checked) {
+	drawGrid();
+};
+redrawPixels();
+drawPreview();
+
 
 function setPx(px, py) {
-	stored_pixels[py][px] = getColorGb(); // want 11, 10, 01, 00
+	stored_pixels[py][px] = getColorGb();
 }
 
 function drawPixel(px0, py0) {
@@ -87,20 +108,23 @@ function drawPixel(px0, py0) {
 	ctx.fillRect(canvasX, canvasY, sideSize, sideSize);
 }
 
+function drawPixelColor(px0, py0, color) {
+	sideSize = pixelCanvas.height / pixels_height;
+
+	// translate to canvas location
+	canvasX = px0 * sideSize;
+	canvasY = py0 * sideSize;
+
+	pxColor = gbToJsColor(color);
+	ctx.fillStyle = pxColor;
+
+	ctx.fillRect(canvasX, canvasY, sideSize, sideSize);
+}
+
 function getColorJs() {
 	const radio_color = document.querySelector('input[name=current_color]:checked').value;
-	color = 'White'; // default
-	switch(radio_color) {
-	case 'color_1':
-		color = 'LightGray';
-		break;
-	case 'color_2':
-		color = 'DarkGray';
-		break;
-	case 'color_3':
-		color = 'Black';
-		break;
-	}
+	palette = document.getElementById("palette_select").value;
+	color = palette_data[palette][radio_color];
 	return color;
 }
 
@@ -121,12 +145,24 @@ function getColorGb() {
 	return color;
 }
 
+function gbToJsColor(gb_color) {
+	palette = document.getElementById("palette_select").value;
+	color = palette_data[palette]['color_0']; // default white
+	switch(gb_color) {
+	case '01':
+		color = palette_data[palette]['color_1']; // light
+		break;
+	case '10':
+		color = palette_data[palette]['color_2']; // dark
+		break;
+	case '11':
+		color = palette_data[palette]['color_3']; // black
+		break;
+	}
+	return color;
+}
 
-// generate asm function for button
 function generateASM() {
-	console.log("generateASM");
-	console.log(stored_pixels);
-
 	// a tile is 8 x 8, with two bytes per row
 	// first byte is the low byte, the second byte is the high byte
 	// bit 0 goes to byte 1, bit 1 goes to byte 0...
@@ -181,7 +217,13 @@ pixelCanvas.onmousedown = function(e) {
 
 	setPx(x_y[0], x_y[1]);
 	drawPixel(x_y[0], x_y[1]);
-	drawGrid();
+
+	gridCheckbox = document.getElementById("grid_checkbox");
+	if (gridCheckbox.checked) {
+		drawGrid();
+	};
+
+	drawPreview();
 }
 
 function translateLocToPx(canvasX, canvasY) {
@@ -200,4 +242,75 @@ function binToHexByte(b) {
 	hex = parseInt(b, 2).toString(16);
 	hex = ('00' + hex).slice(-2);
 	return "$" + hex; // asm prefix
+}
+
+function redrawPixels() {
+	for (var y = 0; y < stored_pixels.length; y++) {
+		for (var x = 0; x < stored_pixels[0].length; x++) {
+			drawPixelColor(x, y, stored_pixels[y][x]);
+		}
+	}
+}
+
+function gridCheckClicked() {
+	redrawPixels();
+
+	gridCheckbox = document.getElementById("grid_checkbox");
+	if (gridCheckbox.checked == true) {
+		drawGrid();
+	}
+}
+
+function paletteChange() {
+	redrawPixels();
+	gridCheckbox = document.getElementById("grid_checkbox");
+	if (gridCheckbox.checked == true) {
+		drawGrid();
+	}
+	drawPreview();
+}
+
+document.onkeydown = function(evt) {
+	if (evt.key == '1') {
+		rd = document.getElementById('color_1')
+		rd.checked = true;
+	} else if (evt.key == '2') {
+		rd = document.getElementById('color_2')
+		rd.checked = true;
+	} else if (evt.key == '3') {
+		rd = document.getElementById('color_3')
+		rd.checked = true;
+	} else if (evt.key == '0') {
+		rd = document.getElementById('color_0')
+		rd.checked = true;
+	}
+}
+
+// TODO: "DRY" some of this with the main canvas functions...
+function drawPreview() {
+	previewCanvas = document.getElementById("canvas_preview");
+	pctx = previewCanvas.getContext("2d");
+
+	redrawPixelsPreview(previewCanvas, pctx);
+}
+
+function drawPixelColorPreview(px0, py0, color, pcanvas, pctx) {
+	sideSize = pcanvas.height / pixels_height;
+
+	// translate to canvas location
+	canvasX = px0 * sideSize;
+	canvasY = py0 * sideSize;
+
+	pxColor = gbToJsColor(color);
+	pctx.fillStyle = pxColor;
+
+	pctx.fillRect(canvasX, canvasY, sideSize, sideSize);
+}
+
+function redrawPixelsPreview(pcanvas, pctx) {
+	for (var y = 0; y < stored_pixels.length; y++) {
+		for (var x = 0; x < stored_pixels[0].length; x++) {
+			drawPixelColorPreview(x, y, stored_pixels[y][x], pcanvas, pctx);
+		}
+	}
 }
